@@ -1,0 +1,370 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum Role {
+  USER
+  VENDOR
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  PENDING
+  BLOCKED
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAIL
+}
+
+// Buyers
+model User {
+  id        Int        @id @default(autoincrement())
+  name      String     @db.VarChar(100)
+  email     String     @unique @db.VarChar(150)
+  phone     String?    @unique @db.VarChar(150)
+  password  String     @db.VarChar(255)
+  status    UserStatus @default(ACTIVE)
+  role      Role       @default(USER)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  cart          Cart?           @relation("UserCart") // ✅ keep this (1-to-1)
+  Order         Order[]
+  Address       Address[]
+  Payment       Payment[]
+  ProductReview ProductReview[]
+}
+
+// Vendors and Admins use same base table
+model Admin {
+  id              Int             @id @default(autoincrement())
+  name            String          @db.VarChar(100)
+  email           String          @unique @db.VarChar(150)
+  password        String          @db.VarChar(255)
+  status          UserStatus      @default(ACTIVE)
+  role            Role            @default(ADMIN)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  Product         Product[]
+  OrderItem       OrderItem[]
+  walletHistories WalletHistory[]
+}
+
+// Main categories
+model MainCategory {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  slug        String   @unique @db.VarChar(255)
+  description String?  @db.Text
+  imgUrl      String?  @db.VarChar(500)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subCategories SubCategory[]
+  Product       Product[]
+}
+
+// Subcategories tied to a main category
+model SubCategory {
+  id             Int      @id @default(autoincrement())
+  mainCategoryId Int
+  name           String   @db.VarChar(255)
+  slug           String   @unique @db.VarChar(255)
+  description    String?  @db.Text
+  imgUrl         String?  @db.VarChar(500)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  mainCategory MainCategory @relation(fields: [mainCategoryId], references: [id], onDelete: Cascade)
+  Product      Product[]
+}
+
+model Product {
+  id             Int          @id @default(autoincrement())
+  name           String       @db.VarChar(255)
+  slug           String       @unique @db.VarChar(255)
+  description    String?      @db.Text
+  mainCategory   MainCategory @relation(fields: [mainCategoryId], references: [id], onDelete: Cascade)
+  mainCategoryId Int
+  subCategory    SubCategory  @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+  subCategoryId  Int
+  vendor         Admin        @relation(fields: [vendorId], references: [id])
+  vendorId       Int
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  variants      ProductVariant[]
+  OrderItem     OrderItem[]
+  ProductReview ProductReview[]
+}
+
+model ProductVariant {
+  id        Int      @id @default(autoincrement())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+  sku       String   @db.VarChar(100)
+  price     Decimal  @db.Decimal(10, 2)
+  stock     Int
+  images    Json?
+  height    String?  @db.VarChar(100)
+  weight    String?  @db.VarChar(100)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  attributes VariantAttribute[]
+  CartItem   CartItem[]
+  OrderItem  OrderItem[]
+}
+
+model VariantAttribute {
+  id                Int                 @id @default(autoincrement())
+  variant           ProductVariant      @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  variantId         Int
+  key               String              @db.VarChar(100)
+  value             String              @db.VarChar(255)
+  CartItemAttribute CartItemAttribute[]
+}
+
+// banners
+
+model Banner {
+  id          Int        @id @default(autoincrement())
+  type        BannerType
+  imgUrl      String     @db.VarChar(255)
+  title       String?    @db.VarChar(255)
+  description String?    @db.Text
+  catId       Int?
+  subCatId    Int?
+  status      Int        @default(1)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+enum BannerType {
+  home
+  offer
+  ads
+  other
+}
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  user      User       @relation("UserCart", fields: [userId], references: [id])
+  userId    Int        @unique
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id                 Int                 @id @default(autoincrement())
+  cart               Cart                @relation(fields: [cartId], references: [id])
+  cartId             Int
+  variant            ProductVariant      @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  variantId          Int
+  quantity           Int
+  price              Decimal             @db.Decimal(10, 2)
+  addedAt            DateTime            @default(now())
+  cartItemAttributes CartItemAttribute[]
+}
+
+model CartItemAttribute {
+  id                 Int              @id @default(autoincrement())
+  cartItemId         Int
+  variantAttributeId Int
+  variantAttribute   VariantAttribute @relation(fields: [variantAttributeId], references: [id])
+  cartItem           CartItem         @relation(fields: [cartItemId], references: [id])
+}
+
+model Order {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
+  address   Address @relation(fields: [addressId], references: [id])
+  addressId Int
+
+  totalAmount Decimal  @db.Decimal(10, 2)
+  gst         Decimal? @db.Decimal(10, 2)
+  discount    Decimal? @db.Decimal(10, 2)
+  couponCode  String?  @db.VarChar(100)
+
+  status         OrderStatus   @default(PENDING)
+  orderStatus    PaymentStatus @default(PENDING) // NEW ENUM (success, fail, pending)
+  paymentMode    String        @db.VarChar(50) // COD, UPI, Razorpay
+  paymentOrderId String?       @db.VarChar(100) // Razorpay or UPI ID
+
+  notes String? @db.Text
+
+  orderItems OrderItem[]
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  walletHistories WalletHistory[]
+}
+
+enum OrderItemStatus {
+  ORDERED
+  SHIPPED
+  DELIVERED
+  CANCELED
+}
+
+model OrderItem {
+  id      Int   @id @default(autoincrement())
+  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId Int
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+  variantId Int
+
+  quantity Int
+  price    Decimal @db.Decimal(10, 2) // snapshot price at the time of order
+
+  vendor   Admin @relation(fields: [vendorId], references: [id])
+  vendorId Int
+
+  orderItemStatus OrderItemStatus @default(ORDERED)
+
+  attributes      Json? // selected attributes (size, color, etc.)
+  walletHistories WalletHistory[]
+}
+
+model Address {
+  id        Int      @id @default(autoincrement())
+  userId    Int // Reference to the user who owns this address
+  houseNo   String   @db.VarChar(255)
+  street    String   @db.VarChar(255)
+  city      String   @db.VarChar(100)
+  district  String   @db.VarChar(100)
+  pincode   String   @db.VarChar(20)
+  isDefault Boolean  @default(false) // Flag for default address
+  status    Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User    @relation(fields: [userId], references: [id])
+  Order Order[]
+}
+
+// payment
+
+model Payment {
+  id         Int      @id @default(autoincrement())
+  userId     Int // Reference to the user who owns this payment
+  order_id   String   @db.VarChar(100)
+  payment_id String   @db.VarChar(100)
+  signature  String   @db.VarChar(100)
+  amount     Int
+  currency   String   @db.VarChar(100)
+  product_id Int
+  status     String   @db.VarChar(100)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Settings {
+  id               Int      @id @default(autoincrement())
+  vendorCommission Int
+  plateformfee     Int
+  gst              Int
+  deliveryFee      Int
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+enum WalletType {
+  credit
+  debit
+}
+
+model WalletHistory {
+  id          Int        @id @default(autoincrement())
+  vendorId    Int
+  amount      Float
+  type        WalletType
+  orderId     Int
+  orderItemId Int
+  createdAt   DateTime   @default(now())
+
+  vendor    Admin     @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+}
+
+model ProductReview {
+  id        Int     @id @default(autoincrement())
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
+  stars     Int      @db.TinyInt // 1 to 5 range recommended
+  comment   String?  @db.Text // optional written review
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PrivacyPolicy {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(150)
+  description String   @db.Text
+  slug        String   @db.VarChar(150)
+  image       String?  @db.VarChar(255)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model TermsAndConditions {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(150)
+  description String   @db.Text
+  slug        String   @db.VarChar(150)
+  image       String?  @db.VarChar(255)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AboutUs {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(150)
+  description String   @db.Text
+  slug        String   @db.VarChar(150)
+  image       String?  @db.VarChar(255)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ContactUs {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(100)
+  email     String   @db.VarChar(100)
+  phone     String?  @db.VarChar(100)
+  subject   String?  @db.VarChar(150)
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+}
