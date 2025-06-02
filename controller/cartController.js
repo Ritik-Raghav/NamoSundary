@@ -120,12 +120,12 @@ export const getCartItems = async (req, res) => {
             variant: {
               include: {
                 product: true,
-                attributes: true, // Include variant attributes
+                attributes: true,
               },
             },
             cartItemAttributes: {
               include: {
-                variantAttribute: true, // Include variant attribute details
+                variantAttribute: true,
               },
             },
           },
@@ -136,11 +136,18 @@ export const getCartItems = async (req, res) => {
     // If cart is empty or doesn't exist
     if (!cart || cart.items.length === 0) {
       return res.json({
+        cartId: cart?.id || null,
         items: [],
         summary: {
           subtotal: 0,
           totalItems: 0,
         },
+        otherCharges: {
+          plateformfee: 0,
+          gst: 0,
+          deliveryFee: 0,
+        },
+        totalAmountafterCharges: 0,
       });
     }
 
@@ -150,11 +157,8 @@ export const getCartItems = async (req, res) => {
     const formattedItems = cart.items.map((item) => {
       const variant = item.variant;
       const product = variant.product;
-
-      // Ensure images is an array; fallback to an empty array if undefined
       const images = Array.isArray(variant.images) ? variant.images : [];
 
-      // Calculate total price for the item
       const itemTotal = Number(item.quantity) * Number(item.price);
       subtotal += itemTotal;
 
@@ -184,26 +188,27 @@ export const getCartItems = async (req, res) => {
         deliveryFee: true,
       },
     });
-    const otherCharges = {
-      plateformfee: settings.plateformfee,
-      gst: settings.gst,
-      deliveryFee: settings.deliveryFee,
-    };
 
-    // Calculate total amount
-    const gstAmount = (subtotal * settings.gst) / 100;
-    const deliveryFee = settings.deliveryFee;
+    const plateformfee = settings?.plateformfee || 0;
+    const gst = settings?.gst || 0;
+    const deliveryFee = settings?.deliveryFee || 0;
+
+    const gstAmount = (subtotal * gst) / 100;
     const totalAmountafterCharges =
-      subtotal + gstAmount + deliveryFee + settings.plateformfee;
+      subtotal + gstAmount + deliveryFee + plateformfee;
 
-    // Respond with formatted cart items and summary
     res.json({
+      cartId: cart.id,
       items: formattedItems,
       summary: {
         subtotal,
         totalItems: formattedItems.length,
       },
-      otherCharges,
+      otherCharges: {
+        plateformfee,
+        gst,
+        deliveryFee,
+      },
       totalAmountafterCharges,
     });
   } catch (error) {
@@ -216,7 +221,6 @@ export const updateCartItemQuantity = async (req, res) => {
   try {
     const userId = req.user.id;
     const cartItemId = parseInt(req.params.Id, 10);
-    console.log("cartItemId", cartItemId);
 
     const { action } = req.body;
 
@@ -229,6 +233,7 @@ export const updateCartItemQuantity = async (req, res) => {
       where: { id: cartItemId },
       include: { cart: true },
     });
+    console.log(cartItem, "ersdtfyghjk");
 
     if (!cartItem || cartItem.cart.userId !== userId) {
       return res
