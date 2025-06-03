@@ -320,6 +320,9 @@ export const addBanner = async (req, res) => {
     const { title, description, catId, subCatId, type } = req.body;
     const imgUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
+    console.log(req.body);
+    console.log(imgUrl);
+
     if (!title || !imgUrl || !type) {
       return res.status(400).json({
         success: false,

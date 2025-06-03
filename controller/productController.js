@@ -31,17 +31,16 @@ export const addProduct = async (req, res) => {
       mainCategoryId,
       subCategoryId,
       // vendorId,
-      adminId,
+      // adminId,
       variants: variantsJson,
     } = req.body;
 
-    const vendorId = req.user.id;
+    const adminId = req.user.id;
+    console.log("adminid---", adminId);
     const missing = [];
-    ["name", "mainCategoryId", "subCategoryId", "adminId", "variants"].forEach(
-      (f) => {
-        if (!req.body[f]) missing.push(f);
-      }
-    );
+    ["name", "mainCategoryId", "subCategoryId", "variants"].forEach((f) => {
+      if (!req.body[f]) missing.push(f);
+    });
     if (missing.length)
       return res.status(400).json({
         success: false,
@@ -139,6 +138,7 @@ export const addProduct = async (req, res) => {
 // GET /products
 export const getAllProducts = async (req, res) => {
   try {
+    console.log("hiiiiiii");
     const products = await prisma.product.findMany({
       include: {
         mainCategory: true,
@@ -155,6 +155,7 @@ export const getAllProducts = async (req, res) => {
         createdAt: "desc",
       },
     });
+    console.log("products", products);
 
     res.status(200).json({ success: true, data: products });
   } catch (err) {
