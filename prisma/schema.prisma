@@ -10,7 +10,7 @@ datasource db {
 // Enums
 enum Role {
   USER
-  VENDOR
+  // VENDOR
   ADMIN
 }
 
@@ -106,8 +106,10 @@ model Product {
   mainCategoryId Int
   subCategory    SubCategory  @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
   subCategoryId  Int
-  vendor         Admin        @relation(fields: [vendorId], references: [id])
-  vendorId       Int
+  // vendor         Admin        @relation(fields: [vendorId], references: [id])
+  // vendorId       Int
+  admin         Admin        @relation(fields: [adminId], references: [id])
+  adminId       Int
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -242,8 +244,10 @@ model OrderItem {
   quantity Int
   price    Decimal @db.Decimal(10, 2) // snapshot price at the time of order
 
-  vendor   Admin @relation(fields: [vendorId], references: [id])
-  vendorId Int
+  // vendor   Admin @relation(fields: [vendorId], references: [id])
+  // vendorId Int
+  admin   Admin @relation(fields: [adminId], references: [id])
+  adminId Int
 
   orderItemStatus OrderItemStatus @default(ORDERED)
 
@@ -288,7 +292,7 @@ model Payment {
 
 model Settings {
   id               Int      @id @default(autoincrement())
-  vendorCommission Int
+  // vendorCommission Int
   plateformfee     Int
   gst              Int
   deliveryFee      Int
@@ -303,14 +307,16 @@ enum WalletType {
 
 model WalletHistory {
   id          Int        @id @default(autoincrement())
-  vendorId    Int
+  // vendorId    Int
+  adminId    Int
   amount      Float
   type        WalletType
   orderId     Int
   orderItemId Int
   createdAt   DateTime   @default(now())
 
-  vendor    Admin     @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  // vendor    Admin     @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  admin    Admin     @relation(fields: [adminId], references: [id], onDelete: Cascade)
   order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderItem OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
 }

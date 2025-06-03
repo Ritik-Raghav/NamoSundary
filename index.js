@@ -10,11 +10,11 @@ import cors from "cors";
 import publicRoutes from "./routes/publicRoute.js";
 import webRoutes from "./routes/webRoute.js";
 import adminRoutes from "./routes/adminRoute.js";
-import vendorRoutes from "./routes/vendorRoute.js";
+// import vendorRoutes from "./routes/vendorRoute.js";
 
 // Import authentication middleware
 import { adminAuth } from "./utils/authMiddleware.js";
-import { vendorAuth } from "./utils/authMiddleware.js";
+// import { vendorAuth } from "./utils/authMiddleware.js";
 
 // Load environment variables
 dotenv.config();
@@ -52,7 +52,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/public", publicRoutes);
 app.use("/api/web", webRoutes);
 app.use("/api/admin", adminAuth, adminRoutes);
-app.use("/api/vendor", vendorAuth, vendorRoutes);
+// app.use("/api/vendor", vendorAuth, vendorRoutes);
 
 // Health check
 app.get("/", (req, res) => res.json({ status: "ok", timestamp: new Date() }));

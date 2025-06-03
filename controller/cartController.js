@@ -338,7 +338,9 @@ export const createOrder = async (req, res) => {
     const orderItemsData = cart.items.map((item) => ({
       productId: item.variant.productId,
       variantId: item.variant.id,
-      vendorId: item.variant.product.vendorId,
+      // vendorId: item.variant.product.vendorId,
+      adminId: item.variant.product.adminId,
+      Id: item.variant.product.adminId,
       quantity: item.quantity,
       price: item.price,
       attributes: item.cartItemAttributes.map((attr) => ({
@@ -427,7 +429,7 @@ export const getOrderByIdAdmin = async (req, res) => {
 
         orderItems: {
           include: {
-            vendor: true,
+            admin: true,
             variant: {
               include: { product: true },
             },
@@ -451,87 +453,87 @@ export const getOrderByIdAdmin = async (req, res) => {
 
 // get all orders
 
-export const getAllOrdersVendor = async (req, res) => {
-  try {
-    const vendorId = req.user.id;
-    if (!vendorId) {
-      return res.status(400).json({ error: "Vendor ID is required." });
-    }
+// export const getAllOrdersVendor = async (req, res) => {
+//   try {
+//     const vendorId = req.user.id;
+//     if (!vendorId) {
+//       return res.status(400).json({ error: "Vendor ID is required." });
+//     }
 
-    const orders = await prisma.order.findMany({
-      where: {
-        orderItems: {
-          some: {
-            variant: {
-              product: {
-                vendorId,
-              },
-            },
-          },
-        },
-      },
-      include: {
-        user: true,
-        orderItems: {
-          include: {
-            variant: {
-              include: { product: true },
-            },
-          },
-        },
-      },
-    });
+//     const orders = await prisma.order.findMany({
+//       where: {
+//         orderItems: {
+//           some: {
+//             variant: {
+//               product: {
+//                 vendorId,
+//               },
+//             },
+//           },
+//         },
+//       },
+//       include: {
+//         user: true,
+//         orderItems: {
+//           include: {
+//             variant: {
+//               include: { product: true },
+//             },
+//           },
+//         },
+//       },
+//     });
 
-    res.status(200).json(orders);
-  } catch (error) {
-    console.error("Error fetching orders:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
+//     res.status(200).json(orders);
+//   } catch (error) {
+//     console.error("Error fetching orders:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
 
 // get order by id vendor
 
-export const getOrderByIdVendor = async (req, res) => {
-  const { id } = req.params;
+// export const getOrderByIdVendor = async (req, res) => {
+//   const { id } = req.params;
 
-  try {
-    const vendorId = req.user.id;
-    if (!vendorId) {
-      return res.status(400).json({ error: "Vendor ID is required." });
-    }
+//   try {
+//     const vendorId = req.user.id;
+//     if (!vendorId) {
+//       return res.status(400).json({ error: "Vendor ID is required." });
+//     }
 
-    const order = await prisma.order.findUnique({
-      where: { id: parseInt(id) },
-      include: {
-        user: true,
-        address: true,
-        orderItems: {
-          where: {
-            variant: {
-              product: {
-                vendorId,
-              },
-            },
-          },
-          include: {
-            variant: {
-              include: { product: true },
-            },
-          },
-        },
-      },
-    });
+//     const order = await prisma.order.findUnique({
+//       where: { id: parseInt(id) },
+//       include: {
+//         user: true,
+//         address: true,
+//         orderItems: {
+//           where: {
+//             variant: {
+//               product: {
+//                 vendorId,
+//               },
+//             },
+//           },
+//           include: {
+//             variant: {
+//               include: { product: true },
+//             },
+//           },
+//         },
+//       },
+//     });
 
-    if (!order) {
-      return res.status(404).json({ error: "Order not found." });
-    }
+//     if (!order) {
+//       return res.status(404).json({ error: "Order not found." });
+//     }
 
-    res.status(200).json(order);
-  } catch (error) {
-    console.error("Error fetching order:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
+//     res.status(200).json(order);
+//   } catch (error) {
+//     console.error("Error fetching order:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
 
 // get user orders
 
@@ -591,31 +593,31 @@ export const getUserOrdersById = async (req, res) => {
 
 // update order item status vendor
 
-export const updateOrderItemStatusVendor = async (req, res) => {
-  const { OrderItemStatus, OrderItemId } = req.body;
-  const OrderItemIdInt = parseInt(OrderItemId, 10);
-  const vendorId = req.user.id;
+// export const updateOrderItemStatusVendor = async (req, res) => {
+//   const { OrderItemStatus, OrderItemId } = req.body;
+//   const OrderItemIdInt = parseInt(OrderItemId, 10);
+//   const vendorId = req.user.id;
 
-  try {
-    const orderItem = await prisma.orderItem.findFirst({
-      where: { id: OrderItemIdInt, vendorId },
-    });
+//   try {
+//     const orderItem = await prisma.orderItem.findFirst({
+//       where: { id: OrderItemIdInt, vendorId },
+//     });
 
-    if (!orderItem) {
-      return res.status(404).json({ error: "Order item not found." });
-    }
+//     if (!orderItem) {
+//       return res.status(404).json({ error: "Order item not found." });
+//     }
 
-    const updatedOrderItem = await prisma.orderItem.update({
-      where: { id: OrderItemIdInt },
-      data: { orderItemStatus: OrderItemStatus },
-    });
+//     const updatedOrderItem = await prisma.orderItem.update({
+//       where: { id: OrderItemIdInt },
+//       data: { orderItemStatus: OrderItemStatus },
+//     });
 
-    res.status(200).json(updatedOrderItem);
-  } catch (error) {
-    console.error("Error updating order item status:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
+//     res.status(200).json(updatedOrderItem);
+//   } catch (error) {
+//     console.error("Error updating order item status:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
 
 // update order item status admin
 

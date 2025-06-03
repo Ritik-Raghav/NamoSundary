@@ -195,9 +195,9 @@ export const adminRegister = async (req, res) => {
     // 2️⃣ Hash the password
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     let status = "ACTIVE";
-    if (role === "VENDOR") {
-      status = "PENDING";
-    }
+    // if (role === "VENDOR") {
+    //   status = "PENDING";
+    // }
 
     // 3️⃣ Save admin with hashed password
     const admin = await prisma.admin.create({
@@ -226,66 +226,66 @@ export const adminRegister = async (req, res) => {
 
 //      vendor
 
-export const vendorLogin = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+// export const vendorLogin = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide all required fields",
-      });
-    }
+//     if (!email || !password) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Please provide all required fields",
+//       });
+//     }
 
-    // 1️⃣ Find vendor by email
-    const vendor = await prisma.admin.findUnique({
-      where: { email },
-    });
-    if (!vendor) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Vendor does not exist" });
-    }
+//     // 1️⃣ Find vendor by email
+//     const vendor = await prisma.admin.findUnique({
+//       where: { email },
+//     });
+//     if (!vendor) {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: "Vendor does not exist" });
+//     }
 
-    if (vendor.status === "PENDING") {
-      return res
-        .status(401)
-        .json({ success: false, message: "Vendor is not approved yet" });
-    }
+//     if (vendor.status === "PENDING") {
+//       return res
+//         .status(401)
+//         .json({ success: false, message: "Vendor is not approved yet" });
+//     }
 
-    // 2️⃣ Validate password
-    const isPasswordValid = await bcrypt.compare(password, vendor.password);
-    if (!isPasswordValid) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid credentials" });
-    }
+//     // 2️⃣ Validate password
+//     const isPasswordValid = await bcrypt.compare(password, vendor.password);
+//     if (!isPasswordValid) {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: "Invalid credentials" });
+//     }
 
-    // 3️⃣ Generate JWT (payload: vendor ID & role)
-    const token = jwt.sign(
-      { userId: vendor.id, role: vendor.role },
-      JWT_SECRET,
-      {
-        expiresIn: JWT_EXPIRES_IN,
-      }
-    );
+//     // 3️⃣ Generate JWT (payload: vendor ID & role)
+//     const token = jwt.sign(
+//       { userId: vendor.id, role: vendor.role },
+//       JWT_SECRET,
+//       {
+//         expiresIn: JWT_EXPIRES_IN,
+//       }
+//     );
 
-    // 4️⃣ Remove sensitive fields
-    const { password: _pwd, ...vendorWithoutPassword } = vendor;
+//     // 4️⃣ Remove sensitive fields
+//     const { password: _pwd, ...vendorWithoutPassword } = vendor;
 
-    // 5️⃣ Send response
-    return res.status(200).json({
-      success: true,
-      message: "Login successful",
-      token,
-      vendor: vendorWithoutPassword,
-    });
-  } catch (error) {
-    console.error("Login error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message,
-    });
-  }
-};
+//     // 5️⃣ Send response
+//     return res.status(200).json({
+//       success: true,
+//       message: "Login successful",
+//       token,
+//       vendor: vendorWithoutPassword,
+//     });
+//   } catch (error) {
+//     console.error("Login error:", error);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Internal server error",
+//       error: error.message,
+//     });
+//   }
+// };

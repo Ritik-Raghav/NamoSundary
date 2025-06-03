@@ -30,12 +30,14 @@ export const addProduct = async (req, res) => {
       description,
       mainCategoryId,
       subCategoryId,
-      vendorId,
+      // vendorId,
+      adminId,
       variants: variantsJson,
     } = req.body;
 
+    const vendorId = req.user.id;
     const missing = [];
-    ["name", "mainCategoryId", "subCategoryId", "vendorId", "variants"].forEach(
+    ["name", "mainCategoryId", "subCategoryId", "adminId", "variants"].forEach(
       (f) => {
         if (!req.body[f]) missing.push(f);
       }
@@ -80,7 +82,8 @@ export const addProduct = async (req, res) => {
           description,
           mainCategoryId: Number(mainCategoryId),
           subCategoryId: Number(subCategoryId),
-          vendorId: Number(vendorId),
+          // vendorId: Number(vendorId),
+          adminId: Number(adminId),
         },
       });
 
@@ -140,7 +143,8 @@ export const getAllProducts = async (req, res) => {
       include: {
         mainCategory: true,
         subCategory: true,
-        vendor: true,
+        // vendor: true,
+        admin: true,
         variants: {
           include: {
             attributes: true,
@@ -172,7 +176,8 @@ export const getProductById = async (req, res) => {
       include: {
         mainCategory: true,
         subCategory: true,
-        vendor: true,
+        // vendor: true,
+        admin: true,
         variants: {
           include: {
             attributes: true, // ✅ Only relation fields here
@@ -200,36 +205,36 @@ export const getProductById = async (req, res) => {
 
 // Get vendor products
 
-export const getVendorProducts = async (req, res) => {
-  const { id } = req.user;
-  try {
-    const products = await prisma.product.findMany({
-      where: { vendorId: id },
-      include: {
-        mainCategory: true,
-        subCategory: true,
-        vendor: true,
-        variants: {
-          include: {
-            attributes: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+// export const getVendorProducts = async (req, res) => {
+//   const { id } = req.user;
+//   try {
+//     const products = await prisma.product.findMany({
+//       where: { vendorId: id },
+//       include: {
+//         mainCategory: true,
+//         subCategory: true,
+//         vendor: true,
+//         variants: {
+//           include: {
+//             attributes: true,
+//           },
+//         },
+//       },
+//       orderBy: {
+//         createdAt: "desc",
+//       },
+//     });
 
-    res.status(200).json({ success: true, data: products });
-  } catch (err) {
-    console.error("Error fetching products:", err);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch products",
-      error: err.message,
-    });
-  }
-};
+//     res.status(200).json({ success: true, data: products });
+//   } catch (err) {
+//     console.error("Error fetching products:", err);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to fetch products",
+//       error: err.message,
+//     });
+//   }
+// };
 
 // Get all products for web
 
@@ -240,6 +245,7 @@ export const getAllProductsweb = async (req, res) => {
         mainCategory: true,
         subCategory: true,
         // vendor: true,
+        admin: true,
         variants: {
           include: {
             attributes: true,
@@ -274,7 +280,8 @@ export const getProductByIdWeb = async (req, res) => {
       include: {
         mainCategory: true,
         subCategory: true,
-        vendor: true,
+        // vendor: true,
+        admin: true,
         variants: {
           include: {
             attributes: true,
@@ -371,6 +378,7 @@ export const getProductsByMainCategoryWeb = async (req, res) => {
         mainCategory: true,
         subCategory: true,
         // vendor: true,
+        admin: true,
         variants: {
           include: {
             attributes: true,
@@ -410,6 +418,7 @@ export const getProductsBySubCategoryWeb = async (req, res) => {
         mainCategory: true,
         subCategory: true,
         // vendor: true,
+        admin: true,
         variants: {
           include: {
             attributes: true,
@@ -454,6 +463,7 @@ export const getProductsBySearchTermWeb = async (req, res) => {
         mainCategory: true,
         subCategory: true,
         // vendor: true,
+        admin: true,
         variants: {
           include: {
             attributes: true,
@@ -477,43 +487,43 @@ export const getProductsBySearchTermWeb = async (req, res) => {
 };
 
 // Get product by ID for vendor
-export const getVendorProductsById = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const vendorId = req.user.id;
-    const product = await prisma.product.findFirst({
-      where: {
-        id: parseInt(id),
-        vendorId: vendorId,
-      },
-      include: {
-        mainCategory: true,
-        subCategory: true,
-        vendor: true,
-        variants: {
-          include: {
-            attributes: true,
-          },
-        },
-      },
-    });
+// export const getVendorProductsById = async (req, res) => {
+//   const { id } = req.params;
+//   try {
+//     const vendorId = req.user.id;
+//     const product = await prisma.product.findFirst({
+//       where: {
+//         id: parseInt(id),
+//         vendorId: vendorId,
+//       },
+//       include: {
+//         mainCategory: true,
+//         subCategory: true,
+//         vendor: true,
+//         variants: {
+//           include: {
+//             attributes: true,
+//           },
+//         },
+//       },
+//     });
 
-    if (!product) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Product not found" });
-    }
+//     if (!product) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Product not found" });
+//     }
 
-    res.status(200).json({ success: true, data: product });
-  } catch (err) {
-    console.error("Error fetching product by ID:", err);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch product",
-      error: err.message,
-    });
-  }
-};
+//     res.status(200).json({ success: true, data: product });
+//   } catch (err) {
+//     console.error("Error fetching product by ID:", err);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to fetch product",
+//       error: err.message,
+//     });
+//   }
+// };
 
 // Delete product by ID
 

@@ -30,20 +30,20 @@ export const adminAuth = (req, res, next) => {
 };
 
 // 🧑‍💼 Vendor middleware
-export const vendorAuth = (req, res, next) => {
-  try {
-    const payload = verifyToken(req);
-    if (payload.role !== "VENDOR") {
-      return res.status(403).json({ success: false, message: "Vendors only" });
-    }
-    req.user = { id: payload.userId, role: payload.role };
-    next();
-  } catch (err) {
-    return res
-      .status(401)
-      .json({ success: false, message: err.message || "Unauthorized" });
-  }
-};
+// export const vendorAuth = (req, res, next) => {
+//   try {
+//     const payload = verifyToken(req);
+//     if (payload.role !== "VENDOR") {
+//       return res.status(403).json({ success: false, message: "Vendors only" });
+//     }
+//     req.user = { id: payload.userId, role: payload.role };
+//     next();
+//   } catch (err) {
+//     return res
+//       .status(401)
+//       .json({ success: false, message: err.message || "Unauthorized" });
+//   }
+// };
 
 // 👤 User middleware
 export const userAuth = (req, res, next) => {

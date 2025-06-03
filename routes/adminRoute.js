@@ -9,11 +9,11 @@ import {
   getAllUsers,
   getUserById,
   updateUserPassword,
-  getAllVendors,
-  getAllPendingVendors,
-  getVendorById,
-  updateVendorPassword,
-  updateVendorStatus,
+  // getAllVendors,
+  // getAllPendingVendors,
+  // getVendorById,
+  // updateVendorPassword,
+  // updateVendorStatus,
   addBanner,
   getAllBanners,
   deleteBannerById,
@@ -83,11 +83,11 @@ router.get("/get-user/:id", getUserById);
 router.put("/update-user-password", updateUserPassword);
 
 //vendor
-router.get("/all-vendors", getAllVendors);
-router.get("/get-all-pending-vendors", getAllPendingVendors);
-router.get("/get-vendor/:id", getVendorById);
-router.put("/update-vendor-password", updateVendorPassword);
-router.put("/update-vendor-status", updateVendorStatus);
+// router.get("/all-vendors", getAllVendors);
+// router.get("/get-all-pending-vendors", getAllPendingVendors);
+// router.get("/get-vendor/:id", getVendorById);
+// router.put("/update-vendor-password", updateVendorPassword);
+// router.put("/update-vendor-status", updateVendorStatus);
 
 // Main category
 router.post("/add-main-category", upload.single("image"), addCategory);

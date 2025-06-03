@@ -120,198 +120,198 @@ export const updateUserPassword = async (req, res) => {
 
 // get all vendors
 
-export const getAllVendors = async (req, res) => {
-  try {
-    const vendors = await prisma.admin.findMany({
-      where: {
-        role: "VENDOR",
-        status: "ACTIVE",
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        status: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+// export const getAllVendors = async (req, res) => {
+//   try {
+//     const vendors = await prisma.admin.findMany({
+//       where: {
+//         role: "VENDOR",
+//         status: "ACTIVE",
+//       },
+//       select: {
+//         id: true,
+//         name: true,
+//         email: true,
+//         role: true,
+//         status: true,
+//         createdAt: true,
+//         updatedAt: true,
+//       },
+//     });
 
-    return res.status(200).json({
-      success: true,
-      message: "All vendors fetched successfully",
-      vendors,
-    });
-  } catch (error) {
-    console.error("Error fetching vendors:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
-  }
-};
+//     return res.status(200).json({
+//       success: true,
+//       message: "All vendors fetched successfully",
+//       vendors,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching vendors:", error);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Internal server error",
+//     });
+//   }
+// };
 
 // get all pending vendors
-export const getAllPendingVendors = async (req, res) => {
-  try {
-    const vendors = await prisma.admin.findMany({
-      where: {
-        role: "VENDOR",
-        status: "PENDING",
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        status: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+// export const getAllPendingVendors = async (req, res) => {
+//   try {
+//     const vendors = await prisma.admin.findMany({
+//       where: {
+//         role: "VENDOR",
+//         status: "PENDING",
+//       },
+//       select: {
+//         id: true,
+//         name: true,
+//         email: true,
+//         role: true,
+//         status: true,
+//         createdAt: true,
+//         updatedAt: true,
+//       },
+//     });
 
-    return res.status(200).json({
-      success: true,
-      message: "All vendors fetched successfully",
-      vendors,
-    });
-  } catch (error) {
-    console.error("Error fetching vendors:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
-  }
-};
+//     return res.status(200).json({
+//       success: true,
+//       message: "All vendors fetched successfully",
+//       vendors,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching vendors:", error);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Internal server error",
+//     });
+//   }
+// };
 
 // get vendor by id
 
-export const getVendorById = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const vendor = await prisma.admin.findUnique({
-      where: {
-        id: Number(id),
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        status: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+// export const getVendorById = async (req, res) => {
+//   const { id } = req.params;
+//   try {
+//     const vendor = await prisma.admin.findUnique({
+//       where: {
+//         id: Number(id),
+//       },
+//       select: {
+//         id: true,
+//         name: true,
+//         email: true,
+//         role: true,
+//         status: true,
+//         createdAt: true,
+//         updatedAt: true,
+//       },
+//     });
 
-    if (!vendor) {
-      return res.status(404).json({
-        success: false,
-        message: "Vendor not found",
-      });
-    }
+//     if (!vendor) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Vendor not found",
+//       });
+//     }
 
-    return res.status(200).json({
-      success: true,
-      message: "Vendor fetched successfully",
-      vendor,
-    });
-  } catch (error) {
-    console.error("Error fetching vendor:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
-  }
-};
+//     return res.status(200).json({
+//       success: true,
+//       message: "Vendor fetched successfully",
+//       vendor,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching vendor:", error);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Internal server error",
+//     });
+//   }
+// };
 
 // update vendor password
 
-export const updateVendorPassword = async (req, res) => {
-  const { id, password } = req.body;
-  try {
-    if (!id || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide all fields",
-      });
-    }
+// export const updateVendorPassword = async (req, res) => {
+//   const { id, password } = req.body;
+//   try {
+//     if (!id || !password) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Please provide all fields",
+//       });
+//     }
 
-    //password hashing
-    const hashedPassword = await bcrypt.hash(password, 10);
+//     //password hashing
+//     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const vendor = await prisma.admin.update({
-      where: {
-        id: Number(id),
-      },
-      data: {
-        password: hashedPassword,
-      },
-    });
+//     const vendor = await prisma.admin.update({
+//       where: {
+//         id: Number(id),
+//       },
+//       data: {
+//         password: hashedPassword,
+//       },
+//     });
 
-    if (!vendor) {
-      return res.status(404).json({
-        success: false,
-        message: "Vendor not found",
-      });
-    }
+//     if (!vendor) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Vendor not found",
+//       });
+//     }
 
-    return res.status(200).json({
-      success: true,
-      message: "Password updated successfully",
-      vendor,
-    });
-  } catch (error) {
-    console.error("Error updating password:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
-  }
-};
+//     return res.status(200).json({
+//       success: true,
+//       message: "Password updated successfully",
+//       vendor,
+//     });
+//   } catch (error) {
+//     console.error("Error updating password:", error);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Internal server error",
+//     });
+//   }
+// };
 
 // update vendor status
 
-export const updateVendorStatus = async (req, res) => {
-  const { id } = req.body;
-  try {
-    if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide all fields",
-      });
-    }
+// export const updateVendorStatus = async (req, res) => {
+//   const { id } = req.body;
+//   try {
+//     if (!id) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Please provide all fields",
+//       });
+//     }
 
-    const vendor = await prisma.admin.update({
-      where: {
-        id: Number(id),
-      },
-      data: {
-        status: "ACTIVE",
-      },
-    });
+//     const vendor = await prisma.admin.update({
+//       where: {
+//         id: Number(id),
+//       },
+//       data: {
+//         status: "ACTIVE",
+//       },
+//     });
 
-    if (!vendor) {
-      return res.status(404).json({
-        success: false,
-        message: "Vendor not found",
-      });
-    }
+//     if (!vendor) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Vendor not found",
+//       });
+//     }
 
-    return res.status(200).json({
-      success: true,
-      message: "Vendor status updated successfully",
-      vendor,
-    });
-  } catch (error) {
-    console.error("Error updating status:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
-  }
-};
+//     return res.status(200).json({
+//       success: true,
+//       message: "Vendor status updated successfully",
+//       vendor,
+//     });
+//   } catch (error) {
+//     console.error("Error updating status:", error);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Internal server error",
+//     });
+//   }
+// };
 
 // add banner
 
@@ -506,12 +506,12 @@ export const getAllBannersWeb = async (req, res) => {
 // set settings
 export const setSettings = async (req, res) => {
   try {
-    const { vendorCommission, plateformfee, gst, deliveryFee } = req.body;
+    const { plateformfee, gst, deliveryFee } = req.body;
 
     // Prepare only the provided fields
     const updateData = {};
-    if (vendorCommission !== undefined)
-      updateData.vendorCommission = parseInt(vendorCommission);
+    // if (vendorCommission !== undefined)
+    //   updateData.vendorCommission = parseInt(vendorCommission);
     if (plateformfee !== undefined)
       updateData.plateformfee = parseInt(plateformfee);
     if (gst !== undefined) updateData.gst = parseInt(gst);
@@ -530,7 +530,7 @@ export const setSettings = async (req, res) => {
       update: updateData,
       create: {
         id: 1,
-        vendorCommission: parseInt(vendorCommission ?? 0),
+        // vendorCommission: parseInt(vendorCommission ?? 0),
         plateformfee: parseInt(plateformfee ?? 0),
         gst: parseInt(gst ?? 0),
         deliveryFee: parseInt(deliveryFee ?? 0),

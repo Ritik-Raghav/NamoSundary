@@ -6,7 +6,7 @@ import {
   userRegister,
   adminLogin,
   adminRegister,
-  vendorLogin,
+  // vendorLogin,
 } from "../controller/publicController.js";
 
 // user login and registration routes
@@ -18,8 +18,8 @@ router.post("/admin-login", adminLogin);
 router.post("/admin-register", adminRegister);
 
 // Vendor login and registration routes
-router.post("/vendor-login", vendorLogin);
-router.post("/vendor-register", adminRegister);
+// router.post("/vendor-login", vendorLogin);
+// router.post("/vendor-register", adminRegister);
 
 // web pages
 
