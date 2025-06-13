@@ -40,6 +40,7 @@ app.use(
       "http://localhost:5174",
       "http://103.189.173.127",
       "http://localhost:3001",
+      "http://localhost:3000",
       "https://namosundarifrontend.vercel.app",
     ], // or your frontend URL
     credentials: true, // if you're using cookies
